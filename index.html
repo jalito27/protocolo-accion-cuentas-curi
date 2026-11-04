@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Cuentas Curi // Guía de Acción Docente</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Space Grotesk (Editorial Brutalism) + Syne (Display) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- html2pdf.js & QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Space Grotesk"', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        rawBlack: '#0d0d0d',
+                        rawWhite: '#f5f5f0',
+                        acidYellow: '#ccff00',
+                        electricBlue: '#3b82f6',
+                        hotPink: '#ff0055',
+                        alertOrange: '#ff5500',
+                        brutalGray: '#1a1a1a',
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px #0d0d0d',
+                        'hard-lg': '8px 8px 0px 0px #0d0d0d',
+                        'hard-sm': '2px 2px 0px 0px #0d0d0d',
+                        'hard-acid': '6px 6px 0px 0px #ccff00',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f5f5f0;
+            color: #0d0d0d;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Neobrutalist UI Elements */
+        .brutalist-card {
+            background-color: #ffffff;
+            border: 3px solid #0d0d0d;
+            box-shadow: 6px 6px 0px 0px #0d0d0d;
+            transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .brutalist-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px #0d0d0d;
+        }
+
+        .brutalist-btn {
+            border: 3px solid #0d0d0d;
+            box-shadow: 4px 4px 0px 0px #0d0d0d;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .brutalist-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 1px 1px 0px 0px #0d0d0d;
+        }
+
+        .brutalist-input {
+            border: 2px solid #0d0d0d;
+            background: #ffffff;
+            font-size: 16px !important; /* Prevents iOS auto-zoom */
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        .brutalist-input:focus {
+            outline: none;
+            background: #fffbeb;
+            box-shadow: 3px 3px 0px 0px #0d0d0d;
+        }
+
+        /* Interactive Accordion Custom Animation */
+        details[open] summary i {
+            transform: rotate(180deg);
+        }
+
+        /* Print Override */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .pdf-container { box-shadow: none !important; border: 2px solid #000 !important; padding: 1rem !important; }
+            .brutalist-card { box-shadow: none !important; border: 2px solid #000 !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-hotPink selection:text-white">
+
+    <!-- Sticky Tactical Top Header -->
+    <header class="bg-rawWhite border-b-4 border-rawBlack sticky top-0 z-40 no-print py-3 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-hotPink text-white border-2 border-rawBlack p-2 font-black text-xs sm:text-sm tracking-tighter uppercase shadow-hard-sm">
+                    ALERTA // CURI
+                </div>
+                <span class="font-display font-black text-sm sm:text-lg tracking-tight hidden sm:inline uppercase">
+                    Protocolo Docente v2.6
+                </span>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button onclick="openQRModal()" class="brutalist-btn bg-white hover:bg-slate-100 text-rawBlack px-3 py-2 text-xs sm:text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span class="hidden md:inline">Compartir QR</span>
+                </button>
+                <button onclick="downloadPDF()" class="brutalist-btn bg-acidYellow hover:bg-lime-300 text-rawBlack px-4 py-2 text-xs sm:text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>PDF Táctico</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12 flex-grow w-full">
+        <div id="pdf-content" class="pdf-container space-y-10 sm:space-y-14">
+
+            <!-- HERO: SWISS NEON TYPOGRAPHY -->
+            <section class="border-b-4 border-rawBlack pb-8 sm:pb-12">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                    <div class="space-y-3 max-w-4xl">
+                        <span class="inline-block bg-rawBlack text-acidYellow font-mono px-3 py-1 font-bold text-xs uppercase tracking-widest border border-rawBlack">
+                            #UseTech4Good // Táctica Escolar
+                        </span>
+                        <h1 class="font-display text-4xl sm:text-6xl md:text-8xl font-black uppercase leading-none tracking-tighter">
+                            CUENTAS <span class="text-hotPink underline decoration-rawBlack decoration-wavy">CURI</span>.
+                        </h1>
+                        <p class="font-display text-2xl sm:text-4xl font-extrabold uppercase text-slate-800 tracking-tight">
+                            Memes, Anonimato y Ciberacoso en la Escuela.
+                        </p>
+                    </div>
+                    <div class="text-right space-y-1 self-start md:self-end shrink-0">
+                        <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Manual de Intervención</p>
+                        <p class="font-mono font-bold text-xs sm:text-sm border-2 border-rawBlack bg-acidYellow px-3 py-1 inline-block shadow-hard-sm">
+                            DOCENTES & DIRECTIVOS
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-6 text-base sm:text-xl font-medium text-slate-900 leading-snug max-w-3xl border-l-4 border-rawBlack pl-4">
+                    La burla digital anónima no es "humor inofensivo". Es hostigamiento sistemático. Acabemos con la pasividad institucional sin caer en el pánico moral.
+                </p>
+            </section>
+
+            <!-- BENTO GRID SECTION: ANATOMÍA DEL FENÓMENO -->
+            <section class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- Bento 1: Concepto Clave (7 cols) -->
+                <div class="md:col-span-7 brutalist-card p-6 sm:p-8 space-y-6">
+                    <div class="flex items-center justify-between border-b-2 border-rawBlack pb-3">
+                        <h2 class="font-display font-black text-xl uppercase tracking-tight">01 // ¿Qué es una cuenta Curi?</h2>
+                        <span class="bg-alertOrange text-white font-mono text-xs px-2 py-0.5 font-bold uppercase">Radardigital</span>
+                    </div>
+                    
+                    <p class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
+                        Perfiles anónimos en Instagram o TikTok creados bajo las siglas del colegio. Publican parodias, stickers de WhatsApp robados, fotos de espaldas y rumores.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="bg-slate-100 border-2 border-rawBlack p-3 font-mono text-xs">
+                            <span class="font-bold text-hotPink block uppercase mb-1">⚡ El Gancho:</span>
+                            Pertenencia y "humor de código interno" que solo entiende el alumnado.
+                        </div>
+                        <div class="bg-slate-100 border-2 border-rawBlack p-3 font-mono text-xs">
+                            <span class="font-bold text-alertOrange block uppercase mb-1">⚠️ El Veneno:</span>
+                            Señalamiento directo a chicos vulnerables y ridiculización a docentes.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bento 2: El Mito del Anonimato (5 cols) -->
+                <div class="md:col-span-5 brutalist-card bg-acidYellow p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b-2 border-rawBlack pb-3 mb-4">
+                            <h2 class="font-display font-black text-xl uppercase tracking-tight">02 // Falso Anonimato</h2>
+                            <i class="fa-solid fa-user-ninja text-xl"></i>
+                        </div>
+                        <p class="text-xs sm:text-sm text-rawBlack font-bold uppercase mb-3">
+                            No necesitan mostrar caras ni poner nombres completos:
+                        </p>
+                        <ul class="font-mono text-xs space-y-2 text-slate-900 font-medium">
+                            <li class="bg-white border border-rawBlack p-2 shadow-hard-sm">
+                                🚫 Un apodo hiriente o muletilla.
+                            </li>
+                            <li class="bg-white border border-rawBlack p-2 shadow-hard-sm">
+                                🚫 La foto de un zapato o mochila en el aula.
+                            </li>
+                            <li class="bg-white border border-rawBlack p-2 shadow-hard-sm">
+                                🚫 Una caricatura del físico de alguien.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="text-[11px] font-mono font-bold bg-white border-2 border-rawBlack p-2 mt-4 text-center">
+                        Basta con que el curso sepa de quién se ríen para que sea agresión.
+                    </div>
+                </div>
+            </section>
+
+            <!-- INTERACTIVE ACCORDION PROTOCOL: PASO A PASO -->
+            <section class="brutalist-card p-6 sm:p-10 space-y-6 bg-white">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b-4 border-rawBlack pb-4 gap-2">
+                    <div>
+                        <span class="bg-electricBlue text-white font-mono text-xs font-bold px-2 py-0.5 uppercase">Plan de Reacción</span>
+                        <h2 class="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight">03 // Protocolo de Intervención en 4 Pasos</h2>
+                    </div>
+                    <span class="text-xs font-mono font-bold border-2 border-rawBlack bg-slate-100 px-3 py-1">
+                        Secuencia Inmediata
+                    </span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Step 1 -->
+                    <details class="group border-3 border-rawBlack bg-slate-50 p-4 shadow-hard-sm cursor-pointer" open>
+                        <summary class="flex justify-between items-center font-display font-black text-base sm:text-xl uppercase select-none list-none">
+                            <span>PASO 1: Preservar Evidencia & Cero Pánico</span>
+                            <i class="fa-solid fa-chevron-down transition-transform duration-200 text-hotPink"></i>
+                        </summary>
+                        <div class="mt-4 font-sans text-xs sm:text-sm text-slate-800 space-y-2 border-t-2 border-rawBlack pt-3">
+                            <p class="font-bold text-alertOrange uppercase">❌ NUNCA amenaces a toda la clase con castigos masivos (genera más viralidad).</p>
+                            <p>✔️ Capturá de pantalla: URL de la cuenta, comentarios, fechas e imágenes. Documentá antes de que la borren o bloqueen.</p>
+                        </div>
+                    </details>
+
+                    <!-- Step 2 -->
+                    <details class="group border-3 border-rawBlack bg-slate-50 p-4 shadow-hard-sm cursor-pointer">
+                        <summary class="flex justify-between items-center font-display font-black text-base sm:text-xl uppercase select-none list-none">
+                            <span>PASO 2: Contención y Respaldo Institucional</span>
+                            <i class="fa-solid fa-chevron-down transition-transform duration-200 text-hotPink"></i>
+                        </summary>
+                        <div class="mt-4 font-sans text-xs sm:text-sm text-slate-800 space-y-2 border-t-2 border-rawBlack pt-3">
+                            <p><strong>Si la víctima es un estudiante:</strong> Escuchá sin restar importancia ("es solo una foto"). Valida su angustia y asegura respaldo.</p>
+                            <p><strong>Si la víctima es un docente:</strong> El equipo directivo debe intervenir de inmediato. Se ataca la convivencia y la dignidad del trabajador.</p>
+                        </div>
+                    </details>
+
+                    <!-- Step 3 -->
+                    <details class="group border-3 border-rawBlack bg-slate-50 p-4 shadow-hard-sm cursor-pointer">
+                        <summary class="flex justify-between items-center font-display font-black text-base sm:text-xl uppercase select-none list-none">
+                            <span>PASO 3: Denuncia Técnica & Protocolo Escolar</span>
+                            <i class="fa-solid fa-chevron-down transition-transform duration-200 text-hotPink"></i>
+                        </summary>
+                        <div class="mt-4 font-sans text-xs sm:text-sm text-slate-800 space-y-2 border-t-2 border-rawBlack pt-3">
+                            <p>Reportá la cuenta por "Acoso o Bullying" en la plataforma (Instagram/TikTok).</p>
+                            <p>Activá el protocolo formal de Convivencia Escolar. Involucrá a Orientación, Tutoría y Dirección. No actúes como un docente aislado.</p>
+                        </div>
+                    </details>
+
+                    <!-- Step 4 -->
+                    <details class="group border-3 border-rawBlack bg-slate-50 p-4 shadow-hard-sm cursor-pointer">
+                        <summary class="flex justify-between items-center font-display font-black text-base sm:text-xl uppercase select-none list-none">
+                            <span>PASO 4: Desmontar al Espectador Pasivo</span>
+                            <i class="fa-solid fa-chevron-down transition-transform duration-200 text-hotPink"></i>
+                        </summary>
+                        <div class="mt-4 font-sans text-xs sm:text-sm text-slate-800 space-y-2 border-t-2 border-rawBlack pt-3">
+                            <p class="font-bold text-electricBlue uppercase">La cuenta vive del 'Like' y del 'Reenvío'.</p>
+                            <p>Enfocá el trabajo en clase en quienes miran y comparten. Sin audiencia que celebre el contenido, la cuenta Curi se apaga.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- BENTO TOOL: INTERACTIVE CHECKLIST "EL ESPEJO DIGITAL" -->
+            <section class="brutalist-card bg-acidYellow p-6 sm:p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-3 border-rawBlack pb-4 gap-2">
+                    <div>
+                        <span class="bg-rawBlack text-white font-mono text-[10px] font-bold px-2 py-0.5 uppercase">Herramienta Didáctica</span>
+                        <h2 class="font-display font-black text-xl sm:text-3xl uppercase tracking-tight">04 // La Prueba del Espejo Digital</h2>
+                    </div>
+                    <span class="text-xs font-mono font-bold bg-white border-2 border-rawBlack px-3 py-1">
+                        Para escribir en la pizarra de clase
+                    </span>
+                </div>
+
+                <p class="text-xs sm:text-sm font-bold uppercase text-slate-900">
+                    4 Filtros que los estudiantes deben completar mentalmente antes de publicar o reenviar un meme escolar:
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label class="bg-white border-3 border-rawBlack p-4 flex items-start gap-3 cursor-pointer shadow-hard-sm">
+                        <input type="checkbox" checked class="accent-hotPink w-5 h-5 shrink-0 mt-0.5">
+                        <span class="text-xs sm:text-sm font-bold">1. ¿La persona que aparece dio su consentimiento real para salir ahí?</span>
+                    </label>
+
+                    <label class="bg-white border-3 border-rawBlack p-4 flex items-start gap-3 cursor-pointer shadow-hard-sm">
+                        <input type="checkbox" checked class="accent-hotPink w-5 h-5 shrink-0 mt-0.5">
+                        <span class="text-xs sm:text-sm font-bold">2. ¿Es para reírnos CON la persona o para reírnos DE la persona?</span>
+                    </label>
+
+                    <label class="bg-white border-3 border-rawBlack p-4 flex items-start gap-3 cursor-pointer shadow-hard-sm">
+                        <input type="checkbox" checked class="accent-hotPink w-5 h-5 shrink-0 mt-0.5">
+                        <span class="text-xs sm:text-sm font-bold">3. ¿Cómo me sentiría si el contenido fuera sobre mi físico o mi familia?</span>
+                    </label>
+
+                    <label class="bg-white border-3 border-rawBlack p-4 flex items-start gap-3 cursor-pointer shadow-hard-sm">
+                        <input type="checkbox" checked class="accent-hotPink w-5 h-5 shrink-0 mt-0.5">
+                        <span class="text-xs sm:text-sm font-bold">4. Si este post llega a la Policía o Dirección, ¿puedo sostenerlo?</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- ACTIONABLE FORM FOR FACULTY / DIRECTORS -->
+            <section class="brutalist-card p-6 sm:p-8 space-y-6 bg-white">
+                <div class="border-b-3 border-rawBlack pb-3">
+                    <h2 class="font-display font-black text-xl uppercase tracking-tight">05 // Registro de Caso & Alianza con Familias</h2>
+                    <p class="text-xs text-slate-600 font-medium">Ficha rápida de seguimiento institucional.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="schoolName" class="block text-xs font-bold uppercase text-slate-700 mb-1">Centro Educativo / Curso:</label>
+                        <input id="schoolName" type="text" placeholder="Ej: Colegio San Martín - 3er Año" class="brutalist-input w-full p-2.5 text-xs">
+                    </div>
+                    <div>
+                        <label for="accountHandle" class="block text-xs font-bold uppercase text-slate-700 mb-1">Nombre de la cuenta Curi detectada:</label>
+                        <input id="accountHandle" type="text" placeholder="Ej: @curis_colegio_ok" class="brutalist-input w-full p-2.5 text-xs">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="actionsTaken" class="block text-xs font-bold uppercase text-slate-700">Acciones Acordadas en Tutoría / Equipo Directivo:</label>
+                    <textarea id="actionsTaken" rows="3" placeholder="Ej: Charla de sensibilización en tutoría, aviso a familias por boletín sobre responsabilidad legal..." class="brutalist-input w-full p-2.5 text-xs"></textarea>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal QR Share -->
+    <div id="qrModal" class="fixed inset-0 bg-rawBlack/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="brutalist-card p-6 max-w-sm w-full space-y-4 text-center bg-white relative">
+            <button onclick="closeQRModal()" class="absolute top-3 right-3 text-rawBlack hover:bg-slate-100 w-8 h-8 flex items-center justify-center border-2 border-rawBlack font-bold">
+                ✕
+            </button>
+            
+            <div class="space-y-1">
+                <span class="bg-acidYellow border border-rawBlack px-2 py-0.5 font-mono text-[10px] font-bold uppercase">Escaneo Móvil</span>
+                <h3 class="font-display font-black text-xl uppercase">Compartir Guía Curi</h3>
+            </div>
+
+            <div class="flex justify-center p-4 bg-slate-50 border-2 border-rawBlack min-h-[180px] items-center">
+                <div id="qrcode"></div>
+            </div>
+
+            <div class="flex gap-2">
+                <input id="shareUrlInput" type="text" readonly class="brutalist-input w-full p-2 text-xs truncate">
+                <button onclick="copyShareUrl(event)" class="brutalist-btn bg-acidYellow px-4 py-2 text-xs shrink-0">
+                    Copiar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editorial Footer with Dual Licenses -->
+    <footer class="bg-rawBlack text-rawWhite py-10 px-4 text-xs font-mono border-t-4 border-rawBlack no-print">
+        <div class="max-w-7xl mx-auto space-y-4 text-center md:text-left md:flex md:items-center md:justify-between md:space-y-0">
+            <div class="space-y-1">
+                <p class="font-bold text-sm tracking-widest uppercase text-acidYellow">#UseTech4Good — Prevención del Ciberacoso Escolar</p>
+                <p class="text-slate-400">Autoría y marco didáctico: <span class="text-white font-bold">@Jalito27</span></p>
+            </div>
+
+            <div class="text-[11px] text-slate-400 max-w-md space-y-1">
+                <p>
+                    Contenido educativo bajo 
+                    <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" class="text-acidYellow underline">CC BY-SA 4.0</a>. 
+                    Código del minisitio bajo <a href="https://opensource.org/licenses/MIT" target="_blank" class="text-acidYellow underline">Licencia MIT</a>.
+                </p>
+                <p class="text-slate-500">Uso libre para colegios, equipos de orientación y docentes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic Scripting -->
+    <script>
+        function downloadPDF() {
+            // Synchronize text inputs & checkboxes for html2pdf
+            const inputs = document.querySelectorAll('#pdf-content input[type="text"], #pdf-content textarea');
+            inputs.forEach(input => input.setAttribute('value', input.value));
+
+            const checkboxes = document.querySelectorAll('#pdf-content input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    cb.setAttribute('checked', 'checked');
+                } else {
+                    cb.removeAttribute('checked');
+                }
+            });
+
+            // Expand all accordion details for full PDF capture
+            const details = document.querySelectorAll('details');
+            details.forEach(d => d.setAttribute('open', 'true'));
+
+            const element = document.getElementById('pdf-content');
+            
+            const opt = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     'Guia_Docente_Cuentas_Curi_UseTech4Good.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().catch(err => console.error(err));
+        }
+
+        let qrCodeInstance = null;
+
+        function openQRModal() {
+            const modal = document.getElementById('qrModal');
+            const shareUrl = window.location.href;
+            document.getElementById('shareUrlInput').value = shareUrl;
+
+            modal.classList.remove('hidden');
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: shareUrl,
+                width: 160,
+                height: 160,
+                colorDark : "#0d0d0d",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').classList.add('hidden');
+        }
+
+        function copyShareUrl(event) {
+            const copyText = document.getElementById("shareUrlInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand("copy");
+            } catch (err) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(copyText.value);
+                }
+            }
+
+            const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            btn.innerText = "¡Copiado!";
+            btn.classList.add('bg-lime-400');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('bg-lime-400');
+            }, 2000);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('qrModal');
+            if (event.target === modal) {
+                closeQRModal();
+            }
+        };
+    </script>
+</body>
+</html>
+```eod
+
+```markdown:Guia Docente Cuentas Curi Web App:index.html
+```
+
+He creado el archivo **`index.html`** con el minisitio web interactivo de la **Guía Docente sobre Cuentas Curi**, adaptado con el diseño vanguardista estilo Awwwards / Swiss Neobrutalism.
+
+### ⚡ Aspectos Clave de esta Versión:
+1. **Diseño Visual de Vanguardia (Swiss Neobrutalism):** Cuadrícula asimétrica (*bento grid*), bordes marcados de alta definición (`3px solid #0d0d0d`), paleta editorial (Negro puro, Amarillo Ácido `#ccff00`, Rosa Neón `#ff0055`) y tipografía `Space Grotesk` / `Syne`.
+2. **Textos sin Clichés de IA:** Mensajes directos, quirúrgicos e irreverentes (*"Menos Pánico Moral, Más Acción Táctica"*, *"El falso anonimato"*, *"Desmontar al espectador pasivo"*).
+3. **Flujo Interactivo y Acordeones Tácticos:** Paso a paso colapsable para docentes y directivos, ideal para proyectar en salas de profesores o tutorías.
+4. **Herramienta "La Prueba del Espejo Digital":** Checklist interactivo para escribir las 4 preguntas filtro en el pizarrón de clase.
+5. **Generador de PDF e Integración QR:** Sincronización automática de datos e impresiones optimizadas para teléfonos inteligentes y escritorio.
+
+¿Te gustaría agregar una sección para notas dirigidas a la Policía de Ciberdelitos o algún protocolo específico para un nivel educativo en particular?
